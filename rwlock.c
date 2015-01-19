@@ -20,6 +20,12 @@ typedef struct ReadWriteLock
 }ReadWriteLock;
 
 //forward declaration
+/* This function is used to take the state of the lock.
+ * Return values:
+ *      [*] 1 is returned when the lock is alive.
+ *      [*] 0 is returned when the lock is marked for delete.
+ *      [*] -1 is returned if an error was encountered.
+ */
 int isActive(ReadWriteLock*);
 
 int rwl_init(ReadWriteLock* lock)
