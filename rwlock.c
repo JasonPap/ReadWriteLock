@@ -40,6 +40,7 @@ int rwl_init(ReadWriteLock* lock)
     {
         perror("rwl_init - could not allocate wrt semaphore\n");
         free(lock);
+        lock = NULL;
         return -1;
     }
     if (sem_init(&(lock->mtx), 0, 1) == -1)
@@ -47,6 +48,7 @@ int rwl_init(ReadWriteLock* lock)
         perror("rwl_init - could not allocate mtx semaphore\n");
         sem_destroy(&(lock->wrt));
         free(lock);
+        lock = NULL;
         return -1;
     }
     if (sem_init(&(lock->delFlag), 0 , 1) == -1)
@@ -55,6 +57,7 @@ int rwl_init(ReadWriteLock* lock)
         sem_destroy(&(lock->wrt));
         sem_destroy(&(lock->mtx));
         free(lock);
+        lock = NULL;
         return -1;
     }
 
@@ -85,7 +88,7 @@ int rwl_destroy(ReadWriteLock* lock)
         perror("rwl_destroy - destroy delFlag failed");
 
     free(lock);
-    lock == NULL;
+    lock = NULL;
     return 0;
 }
 

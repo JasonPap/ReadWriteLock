@@ -9,6 +9,6 @@
 
 int main(void)
 {
-    printf("hello world");
+    //Demo to be implemented
     return 0;
 }
