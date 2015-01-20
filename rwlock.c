@@ -2,7 +2,7 @@
  *  Project: Read-Write Lock for C
  *  File:   rwlock.c
  *  Author: Jason Papapanagiotakis
- *  Github:
+ *  Github:	https://github.com/JasonPap/ReadWriteLock
  */
 #include <semaphore.h>
 #include <stdio.h>

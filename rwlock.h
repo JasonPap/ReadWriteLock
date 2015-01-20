@@ -2,7 +2,7 @@
  *  Project: Read-Write Lock for C
  *  File:   rwlock.h
  *  Author: Jason Papapanagiotakis
- *  Github:
+ *  Github:	https://github.com/JasonPap/ReadWriteLock
  */
 #ifndef RWLOCK_H
 #define	RWLOCK_H
