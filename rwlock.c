@@ -10,15 +10,15 @@
 #include <errno.h>
 #include "rwlock.h"
 
-typedef struct ReadWriteLock
+struct ReadWriteLock_s
 {
     sem_t wrt;
     sem_t mtx;
     sem_t delFlag;
     int readcount;
     int active;
-}ReadWriteLock;
-
+};
+//typedef struct ReadWriteLock_s* ReadWriteLock;
 //forward declaration
 /* This function is used to take the state of the lock.
  * Return values:
@@ -26,97 +26,82 @@ typedef struct ReadWriteLock
  *      [*] 0 is returned when the lock is marked for delete.
  *      [*] -1 is returned if an error was encountered.
  */
-int isActive(ReadWriteLock*);
+int isActive(ReadWriteLock);
 
 int rwl_init(ReadWriteLock* lock)
 {
-    lock = malloc(sizeof(ReadWriteLock));
-    if (lock == NULL)
+    (*lock) = malloc(sizeof(ReadWriteLock));
+    if ((*lock) == NULL)
     {
         perror("rwl_init - could not allocate memory for lock\n");
         return -1;
     }
-    if (sem_init(&(lock->wrt), 0, 1) == -1)
+    if (sem_init(&((*lock)->wrt), 0, 1) == -1)
     {
         perror("rwl_init - could not allocate wrt semaphore\n");
-        free(lock);
-        lock = NULL;
+        free(*lock);
+        *lock = NULL;
         return -1;
     }
-    if (sem_init(&(lock->mtx), 0, 1) == -1)
+    if (sem_init(&((*lock)->mtx), 0, 1) == -1)
     {
         perror("rwl_init - could not allocate mtx semaphore\n");
-        sem_destroy(&(lock->wrt));
-        free(lock);
-        lock = NULL;
+        sem_destroy(&((*lock)->wrt));
+        free(*lock);
+        *lock = NULL;
         return -1;
     }
-    if (sem_init(&(lock->delFlag), 0 , 1) == -1)
+    if (sem_init(&((*lock)->delFlag), 0, 1) == -1)
     {
         perror("rwl_init - could not allocate delFlag semaphore\n");
-        sem_destroy(&(lock->wrt));
-        sem_destroy(&(lock->mtx));
-        free(lock);
-        lock = NULL;
+        sem_destroy(&((*lock)->wrt));
+        sem_destroy(&((*lock)->mtx));
+        free(*lock);
+        *lock = NULL;
         return -1;
     }
-
-    lock->readcount = 0;
-    lock->active = 1;
+    (*lock)->readcount = 0;
+    (*lock)->active = 1;
     return 0;
 }
 
 int rwl_destroy(ReadWriteLock* lock)
 {
     errno = 0;
-    if (sem_trywait(&(lock->wrt)) == -1)
+    if (sem_trywait(&((*lock)->wrt)) == -1)
         perror("rwl_destroy - trywait on wrt failed.");
     if ( errno == EAGAIN)
         perror("rwl_destroy - wrt is locked, undefined behaviour.");
 
     errno = 0;
-    if (sem_trywait(&(lock->mtx)) == -1)
+    if (sem_trywait(&((*lock)->mtx)) == -1)
         perror("rwl_destroy - trywait on mtx failed.");
     if ( errno == EAGAIN)
         perror("rwl_destroy - mtx is locked, undefined behaviour.");
 
-    if (sem_destroy(&(lock->wrt)) == -1)
+    if (sem_destroy(&((*lock)->wrt)) == -1)
         perror("rwl_destroy - destroy wrt failed");
-    if (sem_destroy(&(lock->mtx)) == -1)
+    if (sem_destroy(&((*lock)->mtx)) == -1)
         perror("rwl_destroy - destroy mtx failed");
-    if (sem_destroy(&(lock->delFlag)) == -1)
+    if (sem_destroy(&((*lock)->delFlag)) == -1)
         perror("rwl_destroy - destroy delFlag failed");
 
-    free(lock);
-    lock = NULL;
+    free(*lock);
+    *lock = NULL;
     return 0;
 }
 
-int rwl_writeLock(ReadWriteLock* lock)
+int rwl_writeLock(ReadWriteLock lock)
 {
     if (sem_wait(&(lock->wrt)) == -1)
     {
         perror("rwl_writeLock - wait on wrt failed.");
         return -1;
     }
-
-//    int state = isActive(lock);
-//    if(state == -1)     //error occured in isActive() function
-//    {
-//        sem_post(&(lock->wrt)); //return semaphore to original state
-//        return -1;
-//    }
-//    else if(state == 1) //everything is good
-//        return 0;
-//    else                //the lock is marked for delete
-//    {
-//       sem_post(&(lock->wrt)); //return semaphore to original state
-//        return -1;
-//    }
     return 0;
 }
 
-int rwl_writeUnlock(ReadWriteLock* lock)
+int rwl_writeUnlock(ReadWriteLock lock)
 {
     if (sem_post(&(lock->wrt)) == -1)
     {
@@ -126,7 +111,7 @@ int rwl_writeUnlock(ReadWriteLock* lock)
     return 0;
 }
 
-int rwl_readLock(ReadWriteLock* lock)
+int rwl_readLock(ReadWriteLock lock)
 {
 
     if (sem_wait(&(lock->mtx)) == -1)
@@ -151,7 +136,7 @@ int rwl_readLock(ReadWriteLock* lock)
     return 0;
 }
 
-int rwl_readUnlock(ReadWriteLock* lock)
+int rwl_readUnlock(ReadWriteLock lock)
 {
     if (sem_wait(&(lock->mtx)) == -1)
     {
@@ -174,7 +159,7 @@ int rwl_readUnlock(ReadWriteLock* lock)
     return 0;
 }
 
-int isActive(ReadWriteLock* lock)
+int isActive(ReadWriteLock lock)
 {
     errno = 0;
     if (sem_trywait(&(lock->delFlag)) == -1)

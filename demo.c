@@ -5,6 +5,7 @@
  *  Github: https://github.com/JasonPap/ReadWriteLock
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include "rwlock.h"
 
 int main(void)
