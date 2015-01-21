@@ -30,7 +30,7 @@ int isActive(ReadWriteLock);
 
 int rwl_init(ReadWriteLock* lock)
 {
-    (*lock) = malloc(sizeof(ReadWriteLock));
+    (*lock) = malloc(sizeof(struct ReadWriteLock_s));
     if ((*lock) == NULL)
     {
         perror("rwl_init - could not allocate memory for lock\n");
