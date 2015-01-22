@@ -26,7 +26,7 @@ struct ReadWriteLock_s
  *      [*] 0 is returned when the lock is marked for delete.
  *      [*] -1 is returned if an error was encountered.
  */
-int isActive(ReadWriteLock);
+int rwl_isActive(ReadWriteLock);
 
 int rwl_init(ReadWriteLock* lock)
 {
@@ -67,6 +67,10 @@ int rwl_init(ReadWriteLock* lock)
 
 int rwl_destroy(ReadWriteLock* lock)
 {
+    if (lock == NULL) {
+        perror("rwl_destroy - NULL argument");
+        return -1;
+    }
     errno = 0;
     if (sem_trywait(&((*lock)->wrt)) == -1)
         perror("rwl_destroy - trywait on wrt failed.");
@@ -93,6 +97,10 @@ int rwl_destroy(ReadWriteLock* lock)
 
 int rwl_writeLock(ReadWriteLock lock)
 {
+    if (lock == NULL) {
+        perror("rwl_writeLock - NULL argument");
+        return -1;
+    }
     if (sem_wait(&(lock->wrt)) == -1)
     {
         perror("rwl_writeLock - wait on wrt failed.");
@@ -103,6 +111,10 @@ int rwl_writeLock(ReadWriteLock lock)
 
 int rwl_writeUnlock(ReadWriteLock lock)
 {
+    if (lock == NULL) {
+        perror("rwl_writeUnlock - NULL argument");
+        return -1;
+    }
     if (sem_post(&(lock->wrt)) == -1)
     {
         perror("rwl_writeUnlock - post on wrt failed.");
@@ -113,7 +125,10 @@ int rwl_writeUnlock(ReadWriteLock lock)
 
 int rwl_readLock(ReadWriteLock lock)
 {
-
+    if (lock == NULL) {
+        perror("rwl_readLock - NULL argument");
+        return -1;
+    }
     if (sem_wait(&(lock->mtx)) == -1)
     {
         perror("rwl_readLock - wait on mtx failed");
@@ -138,6 +153,10 @@ int rwl_readLock(ReadWriteLock lock)
 
 int rwl_readUnlock(ReadWriteLock lock)
 {
+    if (lock == NULL) {
+        perror("rwl_readUnlock - NULL argument");
+        return -1;
+    }
     if (sem_wait(&(lock->mtx)) == -1)
     {
         perror("rwl_readUnlock - wait on mtx failed");
@@ -159,17 +178,21 @@ int rwl_readUnlock(ReadWriteLock lock)
     return 0;
 }
 
-int isActive(ReadWriteLock lock)
+int rwl_isActive(ReadWriteLock lock)
 {
+    if (lock == NULL) {
+        perror("rwl_isActive - NULL argument");
+        return -1;
+    }
     errno = 0;
     if (sem_trywait(&(lock->delFlag)) == -1)
     {
-        perror("isActive - trywait on delFlag failed.");
+        perror("rwl_isActive - trywait on delFlag failed.");
         return -1;
     }
     if ( errno == EAGAIN)
     {//delFlag is down, lock is marked for delete
-        perror("isActive - tried to lock but ReadWriteLock was marked for delete");
+        perror("rwl_isActive - tried to lock but ReadWriteLock was marked for delete");
         return 0;
     }
     return 1;
