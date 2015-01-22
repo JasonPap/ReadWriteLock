@@ -1,2 +1,3 @@
-Jason Papapanagiotakis
-Chris Aslanoglou
+Jason Papapanagiotakis  https://github.com/JasonPap
+
+Chris Aslanoglou        https://github.com/chris-asl
